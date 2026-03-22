@@ -23,8 +23,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create new guest registration
-    const registration = new GuestRegistration(body);
+    // Clean the data - remove fields with empty strings, null, or undefined
+    const cleanedData = Object.keys(body).reduce((acc, key) => {
+      const value = body[key];
+      // Only include fields that have a value (not empty string, null, or undefined)
+      if (value !== "" && value !== null && value !== undefined) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as any);
+
+    console.log("[v0] Cleaned data:", {
+      ...cleanedData,
+      signature: cleanedData.signature ? "present" : "missing",
+    });
+
+    // Create new guest registration with cleaned data
+    const registration = new GuestRegistration(cleanedData);
     await registration.save();
     console.log("[v0] Registration saved:", registration._id);
 
